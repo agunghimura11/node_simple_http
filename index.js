@@ -4,7 +4,8 @@ import path from 'path'
 import morgan from 'morgan'
 import bodyParser from 'body-parser';
 
-import { initDatabase, initTable, insertProduct } from './database.js'
+import { initDatabase, initTable, insertProduct, getProduct } from './database.js'
+import {get} from 'http'
 
 const __dirname = path.resolve()
 
@@ -27,8 +28,16 @@ app.get('/', (req,res,next) => {
     res.send({success:true})
 })
 
-app.get('/product', (req,res,next) => {
-    res.render('product')
+app.get('/product', async (req,res,next) => {
+
+    let products 
+    try {
+        products = await getProduct(db)
+    } catch(error) {
+        return next(error)
+    }
+
+    res.render('product', {products})
 })
 
 app.get('/add-product', (req,res,next) => {

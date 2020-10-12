@@ -2,7 +2,8 @@ import express from 'express'
 import hbs from 'hbs'
 import path from 'path'
 import morgan from 'morgan'
-import bodyParser from 'body-parser';
+import bodyParser from 'body-parser'
+import fetch from 'node-fetch'
 
 import { initDatabase, initTable, insertProduct, getProduct } from './database.js'
 import {get} from 'http'
@@ -25,8 +26,38 @@ app.use('/assets', express.static(__dirname + 'assets'))
 app.use(bodyParser.urlencoded())
 
 app.get('/', (req,res,next) => {
-    res.send({success:true})
+    fetch('https://jsonplaceholder.typicode.com/users/1').then(function(response){
+       return response.json()
+    }).then(function(user) {
+        console.log('Data-', user)
+    })
+    
+    // res.send({success:true})
 })
+
+app.get('/loop', (req,res,next) => {
+    const doFetch = (url) =>fetch(url).then(result => result.json())
+    let urls = [
+        'https://jsonplaceholder.typicode.com/users/1',
+        'https://jsonplaceholder.typicode.com/users/2',
+        'https://jsonplaceholder.typicode.com/users/3',
+        'https://jsonplaceholder.typicode.com/users/4',
+    ]
+
+    let promises = []
+
+    urls.map((url) => {
+        promises.push(doFetch(url))
+    })
+
+    Promise.all(promises).then(results => console.log('Hasil do fetch',results))
+})
+// get product list
+// app.get('/product', (req,res,next) => {
+//     const product = getProduct(db)
+//     console.log('Product result', product) // asyncronus karena dijalankan duluan
+//     res.render('product')
+// })
 
 app.get('/product', async (req,res,next) => {
 
